@@ -1,0 +1,19 @@
+index:
+    path: /
+    controller: App\Controller\DefaultController::index
+
+buscarautores:
+    path: /buscarautores
+    controller: App\Controller\DefaultController::buscarAutores
+
+guardarautor:
+    path: /guardarautor
+    controller: App\Controller\DefaultController::guardarAutor
+
+guardareditorial:
+    path: /guardareditorial
+    controller: App\Controller\DefaultController::guardarEditorial
+
+buscareditorial:
+    path: /buscareditorial
+    controller: App\Controller\DefaultController::buscarEditoriales

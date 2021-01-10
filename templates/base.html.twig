@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('librerias/bootstrap/bootstrap.min.css') }}"/>
+            <link rel="stylesheet" href="{{ asset('librerias/datatable/dataTables.min.css') }}"/>
+            <link rel="stylesheet" href="{{ asset('librerias/alertify/alertify.min.css') }}"/>
+        {% endblock %}
+        <title>Bienvenidos</title>        
+    </head>
+    <body class="container-fluid">
+        <div class="row mt-5">
+            <div class="col-lg-12">
+                <ul class="nav nav-pills" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="autores-tab" data-toggle="tab" href="#divAutores" 
+                        role="tab" aria-controls="divAutores" aria-selected="true">Autores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="editoriales-tab" data-toggle="tab" href="#divEditoriales" 
+                        role="tab" aria-controls="divEditoriales" aria-selected="false">Editoriales</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="libros-tab" data-toggle="tab" href="#divLibros" 
+                        role="tab" aria-controls="divLibros" aria-selected="false">Libros</a>
+                    </li>
+                </ul>                
+            </div>            
+        </div>
+        
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="divAutores" role="tabpanel" aria-labelledby="autores-tab">
+                <div class="row mt-5">
+                    <input type="hidden" id="autores_id" class="autores"/>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Nombre</span>
+                            </div>
+                            <input type="text" class="form-control autores" placeholder="Nombre" 
+                            aria-label="Nombre" aria-describedby="basic-addon1" id="autores_nombre">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Apellidos</span>
+                            </div>
+                            <input type="text" class="form-control autores" placeholder="Apellidos" aria-label="Apellidos" aria-describedby="basic-addon1" id="autores_apellidos">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <button type="button" class="btn btn-primary" id="btnLimpiarAutores">Limpiar</button>
+                        <button type="button" class="btn btn-success" id="btnGuardarAutores">Guardar</button>
+                    </div>
+                    <div class="col-lg-12">
+                        <table id="tablaAutores" class="table table-bordered table-striped display"></table>
+                    </div>
+                </div>                
+            </div>
+            <div class="tab-pane fade" id="divEditoriales" role="tabpanel" aria-labelledby="editoriales-tab">
+                <div class="row mt-5">
+                    <input type="hidden" id="editoriales_id" class="editoriales"/>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Nombre</span>
+                            </div>
+                            <input type="text" class="form-control editoriales" placeholder="Nombre" 
+                            aria-label="Nombre" aria-describedby="basic-addon1" id="editoriales_nombre">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Sede</span>
+                            </div>
+                            <input type="text" class="form-control editoriales" placeholder="Sede" aria-label="Sede" aria-describedby="basic-addon1" id="editoriales_sede">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <button type="button" class="btn btn-primary" id="btnLimpiarEditorial">Limpiar</button>
+                        <button type="button" class="btn btn-success" id="btnGuardarEditorial">Guardar</button>
+                    </div>
+                    <div class="col-lg-12">
+                        <table id="tablaEditoriales" class="table table-bordered table-striped display"></table>
+                    </div>
+                </div>     
+            </div>
+            <div class="tab-pane fade" id="divLibros" role="tabpanel" aria-labelledby="libros-tab">
+                <div class="col-lg-12">
+                    <div class="card card-body">
+                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        {% block javascripts %}
+            <script src="{{ asset('librerias/jquery/jquery-3.5.1.min.js') }}" type="text/javascript"></script>
+            <script src="{{ asset('librerias/datatable/dataTables.min.js') }}" type="text/javascript"></script>
+            <script src="{{ asset('librerias/bootstrap/bootstrap.min.js') }}" type="text/javascript"></script>            
+            <script src="{{ asset('librerias/alertify/alertify.min.js') }}" type="text/javascript"></script>            
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $("#autores-tab").click(buscarAutores);
+                    $("#btnGuardarEditorial").click(guardarEditorial);
+                    $("#btnGuardarAutores").click(guardarAutores);
+                    $("#editoriales-tab").click(function(){
+                        $(".editoriales").val("");
+                        buscarEditoriales();                        
+                    });
+                    $("#btnLimpiarEditorial").click(function(){
+                        $(".editoriales").val("");
+                    });
+                    $("#btnLimpiarAutores").click(function(){
+                        $(".autores").val("");
+                    });                    
+                    $("#autores-tab").click();
+                });
+
+                function guardarAutores(){
+                    let id=$("#autores_id").val();             
+                    let nombre=$("#autores_nombre").val();
+                    if(!nombre){
+                        alertify.error('- El nombre del autor no puede estar vacío');
+                        return;
+                    }
+                    let apellidos=$("#autores_apellidos").val();
+                    if(!apellidos){
+                        alertify.error('- Los apellidos del autor no pueden estar vacíos');
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('guardarautor')) }}',
+                        data: {
+                            id, 
+                            nombre,
+                            apellidos
+                        }, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            alertify.success('- El autor fue guardada exitosamente');
+                            $(".autores").val("");
+                            buscarAutores(respuesta.autores);     
+                        }
+                    }); 
+                }
+
+                function buscarEditoriales(datos=[]){
+                    if(parseInt(datos.length)){
+                        cargarTablaEditoriales(datos);
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('buscareditorial')) }}',
+                        data: {}, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            cargarTablaEditoriales(respuesta.editoriales);
+                        }
+                    }); 
+                }
+
+                function buscarAutores(datos=[]){
+                    if(parseInt(datos.length)){
+                        cargarTablaAutores(datos);
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('buscarautores')) }}',
+                        data: {}, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            cargarTablaAutores(respuesta.autores);
+                        }
+                    }); 
+                }
+
+                function cargarTablaEditoriales(datos){
+                    if (!parseInt(datos.length)) {
+                        datos = [];
+                    }
+                    let tabla = $('#tablaEditoriales').DataTable({
+                        paging: 'numbers',
+                        bFilter: false,
+                        destroy: true,
+                        select: true,
+                        dom: 'T<"clear">lfrtip', // Permite cargar la herramienta tableTools
+                        tableTools: {
+                            aButtons: [],
+                            sRowSelect: "single"
+                        },
+                        data: datos,
+                        columns: [
+                            {
+                                data: 'nombre',
+                                title: 'Nombre',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'sede',
+                                title: 'Sede',
+                                className: 'text-capitalize'
+                            }        
+                        ]
+                    });
+                }
+
+                function guardarEditorial(){    
+                    let id=$("#editoriales_id").val();             
+                    let nombre=$("#editoriales_nombre").val();
+                    if(!nombre){
+                        alertify.error('- El nombre del editor no puede estar vacío');
+                        return;
+                    }
+                    let sede=$("#editoriales_sede").val();
+                    if(!sede){
+                        alertify.error('- La sede del editor no puede estar vacío');
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('guardareditorial')) }}',
+                        data: {
+                            id, 
+                            nombre,
+                            sede
+                        }, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            alertify.success('- La editorial fue guardada exitosamente');
+                            $(".editoriales").val("");
+                            buscarEditoriales(respuesta.editoriales);     
+                        }
+                    }); 
+                }
+
+                function cargarTablaAutores(datos){
+                    if (!parseInt(datos.length)) {
+                        datos = [];
+                    }
+                    let tabla = $('#tablaAutores').DataTable({
+                        paging: 'numbers',
+                        bFilter: false,
+                        destroy: true,
+                        select: true,
+                        dom: 'T<"clear">lfrtip', // Permite cargar la herramienta tableTools
+                        tableTools: {
+                            aButtons: [],
+                            sRowSelect: "single"
+                        },
+                        data: datos,
+                        columns: [
+                            {
+                                data: 'nombre',
+                                title: 'Nombre',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'apellidos',
+                                title: 'Apellidos',
+                                className: 'text-capitalize'
+                            }        
+                        ]
+                    });
+                }
+            </script>            
+        {% endblock %}
+    </body>
+</html>
