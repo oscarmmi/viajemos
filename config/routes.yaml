@@ -2,6 +2,30 @@ index:
     path: /
     controller: App\Controller\DefaultController::index
 
+buscarlibros:
+    path: /buscarlibros
+    controller: App\Controller\DefaultController::buscarLibros
+
+guardarlibro:
+    path: /guardarlibro
+    controller: App\Controller\DefaultController::guardarLibros
+
+eliminarlibro:
+    path: /eliminarlibro
+    controller: App\Controller\DefaultController::eliminarLibro
+
+buscarautoresrelacionados:
+    path: /buscarautoresrelacionados
+    controller: App\Controller\DefaultController::buscarAutoresRelacionados
+
+eliminarautorrelacionado:
+    path: /eliminarautorrelacionado
+    controller: App\Controller\DefaultController::eliminarAutorRelacionado
+
+guardarautoresrelacionados:
+    path: /guardarautoresrelacionados
+    controller: App\Controller\DefaultController::guardarAutorRelacionado
+
 buscarautores:
     path: /buscarautores
     controller: App\Controller\DefaultController::buscarAutores

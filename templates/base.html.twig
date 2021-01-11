@@ -91,10 +91,84 @@
                 </div>     
             </div>
             <div class="tab-pane fade" id="divLibros" role="tabpanel" aria-labelledby="libros-tab">
-                <div class="col-lg-12">
-                    <div class="card card-body">
-                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+            <div class="row mt-5">
+                    <input type="hidden" id="libros_isbn" class="libros"/>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Titulo</span>
+                            </div>
+                            <input type="text" class="form-control libros" placeholder="Titulo" 
+                            aria-label="Titulo" aria-describedby="basic-addon1" id="libros_titulo">
+                        </div>
                     </div>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Sinopsis</span>
+                            </div>
+                            <input type="text" class="form-control libros" placeholder="Sinopsis" 
+                            aria-label="Sinopsis" aria-describedby="basic-addon1" id="libros_sinopsis">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">N.Paginas</span>
+                            </div>
+                            <input type="text" class="form-control libros" placeholder="Numero de Paginas" 
+                            aria-label="Numero de Paginas" aria-describedby="basic-addon1" id="libros_n_paginas">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <select class="form-control libros"  id="libros_editoriales_id" title="Seleccione una Editorial" placeholder="Seleccione una Editorial">                            
+                        <option value="">Seleccione una Editorial</option>
+                            {% for editorial in editoriales %}
+                                <option value="{{editorial.id}}">{{editorial.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-6">
+                        <button type="button" class="btn btn-primary" id="btnLimpiarLibro">Limpiar</button>
+                        <button type="button" class="btn btn-success" id="btnGuardarLibro">Guardar</button>
+                    </div>
+                </div>   
+                <div class="row mt-5">
+                    <div class="col-lg-12">
+                        <table id="tablaLibros" class="table table-bordered table-striped display"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" tabindex="-1" role="dialog" id="modalAutoresRelacionados">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Autores Relacionados con el Libro Actual</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mt-5">
+                        <input type="hidden" id="relacionados_isbn" class="relacionados"/>
+                        <div class="col-lg-3">
+                            <select class="form-control relacionados"  id="relacionados_autores_id" title="Seleccione un Autor" placeholder="Seleccione un Autor">                            
+                            <option value="">Seleccione un Autor</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-9">
+                            <button type="button" class="btn btn-success" id="btnRelacionarAutor">Agregar Autor</button>
+                        </div>
+                        <div class="col-lg-12 mt-3">
+                            <table id="tablaAutoresRelacionados" class="table table-bordered table-striped display"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
                 </div>
             </div>
         </div>
@@ -109,21 +183,326 @@
             <script type="text/javascript">            
 
                 $(document).ready(function() {
-                    $("#autores-tab").click(buscarAutores);
-                    $("#btnGuardarEditorial").click(guardarEditorial);
-                    $("#btnGuardarAutores").click(guardarAutores);
+                    $("#autores-tab").click(function(){
+                        $(".autores").val("");
+                        buscarAutores();
+                    });
                     $("#editoriales-tab").click(function(){
                         $(".editoriales").val("");
                         buscarEditoriales();                        
                     });
+                    $("#libros-tab").click(function(){
+                        $(".libros").val("");
+                        buscarLibros();                        
+                    });
+                    $("#btnRelacionarAutor").click(relacionarAutores);
+                    $("#btnGuardarEditorial").click(guardarEditorial);
+                    $("#btnGuardarAutores").click(guardarAutores); 
+                    $("#btnGuardarLibro").click(guardarLibros);
                     $("#btnLimpiarEditorial").click(function(){
                         $(".editoriales").val("");
                     });
                     $("#btnLimpiarAutores").click(function(){
                         $(".autores").val("");
-                    });                    
+                    });    
+                    $("#btnLimpiarLibro").click(function(){
+                        $(".libros").val("");
+                    });     
                     $("#autores-tab").click();
-                });
+                });   
+
+                function relacionarAutores(){
+                    let isbn=$("#relacionados_isbn").val();
+                    if(!isbn){
+                        alertify.error("- El libro seleccionado no es válido");
+                        return;
+                    }
+                    let autores_id=$("#relacionados_autores_id").val();
+                    if(!autores_id){
+                        alertify.error("- Debe seleccionar un autor");
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('guardarautoresrelacionados')) }}',
+                        data: {
+                            isbn, 
+                            autores_id
+                        }, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            recargarSelectAutoresRelacionados(respuesta.relacionados);
+                            cargarTablaAutoresRelacionados(respuesta.relacionados);
+                        }
+                    }); 
+                }
+
+                function recargarSelectAutoresRelacionados(relacionados){
+                    let autoresActuales=$("#tablaAutores").dataTable().fnGetData();
+                    let autoresRelacionados=[];
+                    for (const a in relacionados) {
+                        autoresRelacionados.push(parseInt(relacionados[a]['autores_id']));
+                    }                            
+                    let html="<option value=''>Seleccione un Autor</option>";
+                    for (const a in autoresActuales) {
+                        if(autoresRelacionados.indexOf(parseInt(autoresActuales[a]['id']))==-1){
+                            html+="<option value="+autoresActuales[a]['id']+">"+autoresActuales[a]['nombre']+"</option>";
+                        }                                
+                    }
+                    $("#relacionados_autores_id").html(html);
+                }
+
+                function mostrarAutoresRelacionadosLibro(isbn){
+                    $("#modalAutoresRelacionados").modal('show');
+                    $("#relacionados_isbn").val(isbn);
+                    buscarAutoresRelacionados(isbn);                    
+                }
+
+                function buscarAutoresRelacionados(isbn){
+                    $.ajax({
+                        url: '{{ (path('buscarautoresrelacionados')) }}',
+                        data: {
+                            isbn
+                        }, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            recargarSelectAutoresRelacionados(respuesta.relacionados);
+                            cargarTablaAutoresRelacionados(respuesta.relacionados);
+                        }
+                    }); 
+                }
+                
+                function cargarTablaAutoresRelacionados(datos){
+                    let tabla = $('#tablaAutoresRelacionados').DataTable({
+                        paging: 'numbers',
+                        bFilter: false,
+                        destroy: true,
+                        select: true,
+                        dom: 'T<"clear">lfrtip', // Permite cargar la herramienta tableTools
+                        tableTools: {
+                            aButtons: [],
+                            sRowSelect: "single"
+                        },
+                        data: datos,
+                        columns: [
+                            {
+                                data: 'nombre',
+                                title: 'Nombre',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'apellidos',
+                                title: 'Apellidos',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'id',
+                                title: 'Eliminar',
+                                className: 'text-capitalize dt-body-center',
+                                render: function (data, type, full, meta) {
+                                    return '<a style="cursor:pointer;" onclick="eliminarAutorRelacionado(event);" title="Eliminar este Registro"><i class="fa fa-times  text-danger"></i></a>';
+                                }
+                            }
+                        ]
+                    });                
+                }
+
+                function eliminarAutorRelacionado(e){
+                    var row = $(e.target).parent().parent().parent();
+                    var oRow = $('#tablaAutoresRelacionados').DataTable().row(row).data();
+                    alertify.confirm(
+                        'Esta seguro de eliminar este registro? ',
+                        function () {
+                            $.ajax({
+                                url: '{{ (path('eliminarautorrelacionado')) }}',
+                                data: {
+                                    isbn:oRow.libros_isbn, 
+                                    id:oRow.id
+                                }, 
+                                type: 'POST',
+                                dataType: 'json',
+                                success: function (respuesta) {
+                                    if(parseInt(respuesta.estado)){
+                                        alertify.success("- El registro fue eliminado exitosamente");
+                                        $(".relacionados").val("");
+                                        recargarSelectAutoresRelacionados(respuesta.relacionados);
+                                        cargarTablaAutoresRelacionados(respuesta.relacionados);
+                                        return;
+                                    }                 
+                                    alertify.error(respuesta.mensaje);
+                                }
+                            }); 
+                        }
+                    );
+                }
+
+                function cargarSelectEditorialesLibros(editoriales){
+                    let html="<option value=''>Seleccione una Editorial</option>";
+                    for (const a in editoriales) {
+                        html+="<option value="+editoriales[a]['id']+">"+editoriales[a]['nombre']+"</option>";
+                    }
+                    $("#libros_editoriales_id").html(html);
+                }
+
+                function guardarLibros(){
+                    let ISBN=$("#libros_isbn").val();             
+                    let titulo=$("#libros_titulo").val();
+                    if(!titulo){
+                        alertify.error('- El titulo del libro no puede estar vacío');
+                        return;
+                    }
+                    let sinopsis=$("#libros_sinopsis").val();
+                    if(!sinopsis){
+                        alertify.error('- La sinopsis del libro no puede estar vacío');
+                        return;
+                    }
+                    let n_paginas=$("#libros_n_paginas").val();
+                    if(!n_paginas){
+                        alertify.error('- El numero de paginas ingresado no puede estar vacío');
+                        return;
+                    }
+                    let editorial_id=$("#libros_editoriales_id").val();
+                    if(!editorial_id){
+                        alertify.error('- Debe seleccionar una editorial');
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('guardarlibro')) }}',
+                        data: {
+                            ISBN, 
+                            titulo,
+                            sinopsis, 
+                            n_paginas,
+                            editorial_id
+                        }, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            alertify.success('- El libro fue guardado exitosamente');
+                            $(".libros").val("");
+                            buscarLibros(respuesta.libros);     
+                        }
+                    }); 
+                }
+                
+                function buscarLibros(datos=[]){
+                    if(parseInt(datos.length)){
+                        cargarTablaLibros(datos);
+                        return;
+                    }
+                    $.ajax({
+                        url: '{{ (path('buscarlibros')) }}',
+                        data: {}, 
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (respuesta) {
+                            cargarTablaLibros(respuesta.libros);
+                        }
+                    }); 
+                }
+
+                function cargarTablaLibros(datos){
+                    if (!parseInt(datos.length)) {
+                        datos = [];
+                    }
+                    let tabla = $('#tablaLibros').DataTable({
+                        paging: 'numbers',
+                        bFilter: false,
+                        destroy: true,
+                        select: true,
+                        dom: 'T<"clear">lfrtip', // Permite cargar la herramienta tableTools
+                        tableTools: {
+                            aButtons: [],
+                            sRowSelect: "single"
+                        },
+                        data: datos,
+                        columns: [
+                            {
+                                data: 'editorial',
+                                title: 'Editorial',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'titulo',
+                                title: 'Titulo',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'sinopsis',
+                                title: 'Sinopsis',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'n_paginas',
+                                title: 'Número de Paginas',
+                                className: 'text-capitalize'
+                            },
+                            {
+                                data: 'isbn',
+                                title: 'Eliminar',
+                                className: 'text-capitalize dt-body-center',
+                                render: function (data, type, full, meta) {
+                                    return '<a style="cursor:pointer;" onclick="eliminarLibro('+data+');" title="Eliminar este Registro"><i class="fa fa-times  text-danger"></i></a>';
+                                }
+                            },
+                            {
+                                data: 'isbn',
+                                title: 'Editar',
+                                className: 'text-capitalize dt-body-center',
+                                render: function (data, type, full, meta) {
+                                    return '<a style="cursor:pointer;" onclick="editarLibro(event);" title="Editar este Registro"><i class="fa fa-pencil text-primary"></i></a>';
+                                }
+                            },
+                            {
+                                data: 'isbn',
+                                title: 'Autores',
+                                className: 'text-capitalize dt-body-center',
+                                render: function (data, type, full, meta) {
+                                    return '<a style="cursor:pointer;" onclick="mostrarAutoresRelacionadosLibro('+data+');" title="Mostrar Autores relacionados con el Libro"><i class="fa fa-bars text-success"></i></a>';
+                                }
+                            }
+                        ]
+                    });                
+                }
+
+                function eliminarLibro(isbn){
+                    alertify.confirm(
+                        'Esta seguro de eliminar este registro? ',
+                        function () {
+                            $.ajax({
+                                url: '{{ (path('eliminarlibro')) }}',
+                                data: {
+                                    isbn
+                                }, 
+                                type: 'POST',
+                                dataType: 'json',
+                                success: function (respuesta) {
+                                    if(parseInt(respuesta.estado)){
+                                        alertify.success("- El registro fue eliminado exitosamente");
+                                        $(".libros").val("");
+                                        buscarLibros(respuesta.libros);  
+                                        return;
+                                    }                 
+                                    alertify.error(respuesta.mensaje);
+                                }
+                            }); 
+                        }
+                    );
+                }
+
+                function editarLibro(e){
+                    var row = $(e.target).parent().parent().parent();
+                    var oRow = $('#tablaLibros').DataTable().row(row).data();
+                    alertify.confirm(
+                        'Esta seguro de cargar este registro para editarlo? ',
+                        function () {
+                            for (const a in oRow) {
+                                $("#libros_"+a).val(oRow[a]);
+                            }
+                        }
+                    );
+                }
 
                 function guardarAutores(){
                     let id=$("#autores_id").val();             
@@ -293,6 +672,7 @@
                         success: function (respuesta) {
                             alertify.success('- La editorial fue guardada exitosamente');
                             $(".editoriales").val("");
+                            cargarSelectEditorialesLibros(respuesta.editoriales);
                             buscarEditoriales(respuesta.editoriales);     
                         }
                     }); 
