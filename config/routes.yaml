@@ -10,6 +10,10 @@ guardarautor:
     path: /guardarautor
     controller: App\Controller\DefaultController::guardarAutor
 
+eliminarautor:
+    path: /eliminarautor
+    controller: App\Controller\DefaultController::eliminarAutor
+
 guardareditorial:
     path: /guardareditorial
     controller: App\Controller\DefaultController::guardarEditorial
@@ -17,3 +21,7 @@ guardareditorial:
 buscareditorial:
     path: /buscareditorial
     controller: App\Controller\DefaultController::buscarEditoriales
+
+eliminareditorial:
+    path: /eliminareditorial
+    controller: App\Controller\DefaultController::eliminarEditorial

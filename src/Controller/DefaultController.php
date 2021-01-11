@@ -63,6 +63,31 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/eliminarautor")
+     */
+    public function eliminarAutorAction(Request $request)
+    {        
+        $id=$request->get('id');
+        $entityManager = $this->getDoctrine()->getManager();
+        $respuesta=[
+            'estado'=>1
+        ];
+        $autor=null;
+        if($id){
+            $autor = $this->getDoctrine()->getRepository(Autores::class)->find($id);
+        }
+        if(!$autor){
+            $respuesta['estado']=0;
+            $respuesta['mensaje']="- El autor seleccionado no es válido o no existe";
+            return new JsonResponse($respuesta);
+        }
+        $entityManager->remove($autor);
+        $entityManager->flush();
+        $respuesta['autores']=$this->buscarAutoresAction(1);
+        return new JsonResponse($respuesta);
+    }
+
+    /**
      * @Route("/buscareditorial")
      */
     public function buscarEditorialesAction($indicador=0)
@@ -101,5 +126,30 @@ class DefaultController extends AbstractController
         $entityManager->persist($editor);
         $entityManager->flush();
         return new JsonResponse(['editoriales'=>$this->buscarEditorialesAction(1)]);
+    }
+
+    /**
+     * @Route("/eliminareditorial")
+     */
+    public function eliminarEditorialAction(Request $request)
+    {        
+        $id=$request->get('id');
+        $entityManager = $this->getDoctrine()->getManager();
+        $respuesta=[
+            'estado'=>1
+        ];
+        $editor=null;
+        if($id){
+            $editor = $this->getDoctrine()->getRepository(Editoriales::class)->find($id);
+        }
+        if(!$editor){
+            $respuesta['estado']=0;
+            $respuesta['mensaje']="- El editor seleccionado no es válido o no existe";
+            return new JsonResponse($respuesta);
+        }
+        $entityManager->remove($editor);
+        $entityManager->flush();
+        $respuesta['editoriales']=$this->buscarEditorialesAction(1);
+        return new JsonResponse($respuesta);
     }
 }
